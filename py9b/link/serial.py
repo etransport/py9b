@@ -7,7 +7,7 @@ from binascii import hexlify
 from .base import BaseLink, LinkTimeoutException, LinkOpenException
 
 
-class SerialLink():
+class SerialLink(BaseLink):
 	def __init__(self, *args, **kwargs):
 		super(SerialLink, self).__init__(*args, **kwargs)
 		self.com = None

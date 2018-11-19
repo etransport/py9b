@@ -83,7 +83,7 @@ class XiaomiTransport(BT):
 	
 	def send(self, packet):
 		dev = self._make_addr(packet.src, packet.dst)
-		pkt = pack("<BBBB", len(packet.data)+2, dev, packet.cmd, packet.reg)+packet.data
+		pkt = pack("<BBBB", len(packet.data)+2, dev, packet.cmd, packet.arg)+packet.data
 		pkt = "\x55\xAA" + pkt + pack("<H", checksum(pkt))
 		self.link.write(pkt)
 

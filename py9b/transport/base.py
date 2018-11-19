@@ -20,8 +20,16 @@ class BaseTransport(object):
 	def recv(self):
 		raise NotImplementedError()
 
-	def send(self, src, dst, cmd, param, data=""):
+	def send(self, src, dst, cmd, arg, data=""):
 		raise NotImplementedError()
+
+	def execute(self, command):
+		self.send(command.request)
+		if not command.has_response:
+			return True
+		#TODO: retry ?
+		rsp = self.recv()
+		return command.handle_response(rsp)
 
 
 __all__ = ["checksum", "BaseTransport"]

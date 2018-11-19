@@ -14,8 +14,8 @@ with TCPLink() as link:
 	#link.open(("192.168.1.45", 6000))
 	link.open(ports[0][1])
 
-	#req = PKT(src=BT.HOST, dst=BT.ESC, cmd=0x01, reg=0x10, data="\x10")
-	req = PKT(src=BT.HOST, dst=BT.BMS, cmd=0x01, reg=0x10, data="\x10")
+	#req = PKT(src=BT.HOST, dst=BT.ESC, cmd=0x01, arg=0x10, data="\x10")
+	req = PKT(src=BT.HOST, dst=BT.BMS, cmd=0x01, arg=0x10, data="\x10")
 
 	while raw_input("Press ENTER to send...")!="q":
 		tran.send(req)

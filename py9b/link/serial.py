@@ -23,7 +23,7 @@ class SerialLink(BaseLink):
 
 	def scan(self):
 		ports = lp.comports()
-		res = [(port.device, "%04X:%04X" % (port.vid, port.pid)) for port in ports]
+		res = [("%s %04X:%04X" % (port.device, port.vid, port.pid), port.device) for port in ports]
 		return res
 
 

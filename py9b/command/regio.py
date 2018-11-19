@@ -1,0 +1,36 @@
+from struct import pack, unpack, calcsize
+from .base import BaseCommand, InvalidResponse
+
+
+class ReadRegs(BaseCommand):
+	def __init__(self, dev, reg, format):
+		super(ReadRegs, self).__init__(dst=dev, cmd=0x01, arg=reg, data=pack("<B", calcsize(format)), has_response=True)
+		self.dev = dev
+		self.reg = reg
+		self.format = format
+
+	def handle_response(self, response):
+		if response.arg!=self.reg or len(response.data)!=calcsize(self.format):
+			raise InvalidResponse("ReadRegs {0:X}:{1:X}".format(self.dev, self.reg))
+		return unpack(self.format, response.data)
+
+
+class WriteProtectError(Exception):
+	pass
+
+
+class WriteRegs(BaseCommand):
+	def __init__(self, dev, reg, format, *args):
+		super(WriteRegs, self).__init__(dst=dev, cmd=0x02, arg=reg, data=pack(format, *args), has_response=True)
+		self.dev = dev
+		self.reg = reg
+
+	def handle_response(self, response):
+		if response.arg!=self.reg or len(response.data)!=1:
+			raise InvalidResponse("WriteRegs {0:X}:{1:X}".format(self.dev, self.reg))
+		if unpack("<B", response.data)[0]!=1:
+			raise WriteProtectError("WriteRegs {0:X}:{1:X}".format(self.dev, self.reg))
+		return True
+
+
+__all__=["ReadRegs", "WriteRegs", "WriteProtectError"]

@@ -14,26 +14,30 @@ class XiaomiTransport(BT):
 	MASTER2BMS = 0x22
 	BMS2MASTER = 0x25
 
-	DEV01	 = 0x01
+	MOTOR	 = 0x01
 	DEVFF	 = 0xFF
 
-	_SaDa2Addr = { 	BT.HOST : { BT.DEV01 : DEV01, BT.ESC  : MASTER2ESC, BT.BLE : MASTER2BLE, BT.BMS : MASTER2BMS },
-					BT.ESC	: { BT.HOST : ESC2MASTER, BT.BLE : MASTER2BLE, BT.BMS : MASTER2BMS, BT.DEV01 : DEV01 },
-					BT.BMS  : { BT.HOST : BMS2MASTER, BT.ESC : BMS2MASTER, BT.DEV01 : DEV01 },
-					BT.DEV01 : {BT.HOST : DEV01, BT.ESC : DEV01, BT.BMS : DEV01 } }
+	_SaDa2Addr = { 	BT.HOST : { BT.MOTOR : MOTOR, BT.ESC  : MASTER2ESC, BT.BLE : MASTER2BLE, BT.BMS : MASTER2BMS },
+					BT.ESC	: { BT.HOST : ESC2MASTER, BT.BLE : MASTER2BLE, BT.BMS : MASTER2BMS, BT.MOTOR : MOTOR },
+					BT.BMS  : { BT.HOST : BMS2MASTER, BT.ESC : BMS2MASTER, BT.MOTOR : MOTOR },
+					BT.MOTOR : {BT.HOST : MOTOR, BT.ESC : MOTOR, BT.BMS : MOTOR } }
 
 	# TBC
 	_BleAddr2SaDa = { 	MASTER2ESC : (BT.HOST, BT.ESC), 
 						ESC2MASTER : (BT.ESC, BT.HOST),
 						MASTER2BMS : (BT.HOST, BT.BMS),
 						BMS2MASTER : (BT.BMS, BT.HOST),
-						DEV01	 : (BT.DEV01, BT.HOST) }
+						MASTER2BLE : (BT.HOST, BT.BLE),
+						BLE2MASTER : (BT.BLE, BT.HOST),
+						MOTOR	 : (BT.MOTOR, BT.HOST) }
 
 	_BmsAddr2SaDa = { 	MASTER2ESC : (BT.BMS, BT.ESC), 
 						ESC2MASTER : (BT.ESC, BT.BMS),
 						MASTER2BMS : (BT.ESC, BT.BMS),
 						BMS2MASTER : (BT.BMS, BT.ESC),
-						DEV01	 : (BT.DEV01, BT.BMS) }
+						MASTER2BLE : (BT.BMS, BT.BLE),
+						BLE2MASTER : (BT.BLE, BT.BMS),
+						MOTOR	 : (BT.MOTOR, BT.BMS) }
 
 
 	def __init__(self, link, device=BT.HOST):
@@ -78,7 +82,7 @@ class XiaomiTransport(BT):
 			print "Checksum mismatch !"
 			return None
 		sa, da = self._split_addr(ord(pkt[1]))
-		return BasePacket(sa, da, ord(pkt[2]), ord(pkt[3]), pkt[4:-2]) # sa, da, cmd, param, data
+		return BasePacket(sa, da, ord(pkt[2]), ord(pkt[3]), pkt[4:-2]) # sa, da, cmd, arg, data
 
 	
 	def send(self, packet):

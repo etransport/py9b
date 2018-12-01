@@ -29,6 +29,8 @@ class Fifo():
 _rx_char_uuid = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 _tx_char_uuid = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
 
+_write_chunk_size = 20 # as in android dumps
+
 class BLELink(BaseLink):
 	def __init__(self, *args, **kwargs):
 		super(BLELink, self).__init__(*args, **kwargs)
@@ -93,7 +95,13 @@ class BLELink(BaseLink):
 	def write(self, data):
 		if self.dump:
 			print ">", hexlify(data).upper()
-		self._dev.char_write_handle(self._wr_handle, bytearray(data))
+		size = len(data)
+		ofs = 0
+		while size:
+			chunk_sz = min(size, _write_chunk_size)
+			self._dev.char_write_handle(self._wr_handle, bytearray(data[ofs:ofs+chunk_sz]))
+			ofs += chunk_sz
+			size -= chunk_sz
 
 
 __all__ = ["BLELink"]

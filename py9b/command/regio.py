@@ -1,3 +1,5 @@
+"""Register read/write commands"""
+
 from struct import pack, unpack, calcsize
 from .base import BaseCommand, InvalidResponse
 
@@ -11,7 +13,7 @@ class ReadRegs(BaseCommand):
 
 	def handle_response(self, response):
 		if response.arg!=self.reg or len(response.data)!=calcsize(self.format):
-			raise InvalidResponse("ReadRegs {0:X}:{1:X}".format(self.dev, self.reg))
+			raise InvalidResponse("ReadRegs {0:X}:{1:X}: @{2:X} [{3:X}]".format(self.dev, self.reg, response.arg, len(response.data)))
 		return unpack(self.format, response.data)
 
 

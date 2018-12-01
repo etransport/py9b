@@ -7,12 +7,15 @@ def checksum(data):
 	return (s & 0xFFFF) ^ 0xFFFF
 
 
+
 class BaseTransport(object):
-	DEV01 = 1
+	MOTOR = 0x01
 	ESC = 0x20
 	BLE = 0x21
 	BMS = 0x22
 	HOST = 0x3E
+	
+	DeviceNames = { MOTOR : "MOTOR", ESC : "ESC", BLE : "BLE", BMS : "BMS", HOST : "HOST" }
 
 	def __init__(self, link):
 		self.link = link
@@ -30,6 +33,10 @@ class BaseTransport(object):
 		#TODO: retry ?
 		rsp = self.recv()
 		return command.handle_response(rsp)
+
+	@staticmethod
+	def GetDeviceName(dev):
+		return BaseTransport.DeviceNames.get(dev, "%02X" % (dev))
 
 
 __all__ = ["checksum", "BaseTransport"]

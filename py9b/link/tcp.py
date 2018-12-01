@@ -6,6 +6,7 @@ from .base import BaseLink, LinkTimeoutException, LinkOpenException
 
 HOST, PORT = "127.0.0.1", 6000
 
+_write_chunk_size = 20 # as in android dumps
 
 def recvall(sock, size):
 	data = ""
@@ -63,7 +64,13 @@ class TCPLink(BaseLink):
 	def write(self, data):
 		if self.dump:
 			print ">", hexlify(data).upper()
-		self.sock.sendall(data)
+		size = len(data)
+		ofs = 0
+		while size:
+			chunk_sz = min(size, _write_chunk_size)
+			self.sock.sendall(data[ofs:ofs+chunk_sz])
+			ofs += chunk_sz
+			size -= chunk_sz
 
 
 __all__ = ["TCPLink"]

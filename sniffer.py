@@ -7,6 +7,7 @@ from py9b.link.serial import SerialLink
 from py9b.transport.base import BaseTransport as BT
 from py9b.transport.packet import BasePacket as PKT
 from py9b.transport.xiaomi import XiaomiTransport
+from py9b.transport.ninebot import NinebotTransport
 
 link = SerialLink()
 #link = TCPLink()
@@ -17,7 +18,8 @@ with link:
 	ports = link.scan()
 	print ports
 
-	tran = XiaomiTransport(link)
+	#tran = XiaomiTransport(link)
+	tran = NinebotTransport(link)
 
 	#link.open(("192.168.1.45", 6000))
 	link.open(ports[0][1])

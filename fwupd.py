@@ -6,11 +6,9 @@ import argparse
 from progressbar import ProgressBar
 
 from py9b.link.base import LinkOpenException, LinkTimeoutException
-from py9b.link.tcp import TCPLink
-from py9b.link.ble import BLELink
-from py9b.link.serial import SerialLink
 from py9b.transport.base import BaseTransport as BT
 from py9b.transport.xiaomi import XiaomiTransport
+from py9b.transport.ninebot import NinebotTransport
 from py9b.command.regio import ReadRegs, WriteRegs
 from py9b.command.update import *
 
@@ -59,7 +57,8 @@ def UpdateFirmware(link, tran, dev, fwfile):
 		chunk_sz = min(fw_size, fw_page_size)
 		data = fwfile.read(chunk_sz)
 		chk = checksum(chk, data)
-		tran.execute(WriteUpdate(dev, page, data))
+		#tran.execute(WriteUpdate(dev, page, data))
+		tran.execute(WriteUpdate(dev, page, data+b'\x00'*(fw_page_size-chunk_sz))) # TODO: Ninebot wants this padding. Will it work on M365 too?
 		page += 1
 		fw_size -= chunk_sz
 	pb.finish()
@@ -86,13 +85,12 @@ parser.add_argument('device', help='target device', type=str.lower, choices=devi
 
 parser.add_argument('file', type=argparse.FileType('rb'), help='firmware file')
 
-interfaces = {'ble' : BLELink, 'serial' : SerialLink, 'tcp' : TCPLink}
 parser.add_argument('-i', '--interface', help='communication interface, default: %(default)s', type=str.lower,
-	choices=interfaces,  default='ble')
+	choices=('ble', 'serial', 'tcp'),  default='ble')
 
 parser.add_argument('-a', '--address', help='communication address (ble: BDADDR, serial: port, tcp: host:port), default: first available')
 
-protocols = {'xiaomi' : XiaomiTransport} # TODO: add Ninebot ES
+protocols = {'xiaomi' : XiaomiTransport, 'ninebot' : NinebotTransport }
 parser.add_argument('-p', '--protocol', help='communication protocol, default: %(default)s', type=str.lower,
 	choices=protocols, default='xiaomi')
 
@@ -102,11 +100,24 @@ if len(argv)==1:
 args = parser.parse_args()
 
 dev = devices.get(args.device)
-link = interfaces.get(args.interface)()
 
+if args.interface=='ble':
+	try:
+		from py9b.link.ble import BLELink
+	except:
+		exit('BLE is not supported on your system !')
+	link = BLELink()
+elif args.interface=='tcp':
+	from py9b.link.tcp import TCPLink
+	link = TCPLink()
+elif args.interface=='serial':
+	from py9b.link.serial import SerialLink
+	link = SerialLink()
+else:
+	exit('!!! BUG !!! Unknown interface selected: '+args.interface)
+		
 with link:
 	tran = protocols.get(args.protocol)(link)
-
 
 	if args.address:
 		addr = args.address
@@ -124,4 +135,4 @@ with link:
 		UpdateFirmware(link, tran, dev, args.file)
 	except Exception as e:
 		print('Error:', e)
-
+		raise

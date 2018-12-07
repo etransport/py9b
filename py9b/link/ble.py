@@ -19,15 +19,15 @@ class Fifo():
 			self.q.put(b)
 
 	def read(self, size=1, timeout=None): # but read string
-		res = ""
+		res = ''
 		for i in xrange(size):
 			res += chr(self.q.get(True, timeout))
 		return res
 
 
-#_cccd_uuid = "00002902-0000-1000-8000-00805f9b34fb"
-_rx_char_uuid = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
-_tx_char_uuid = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
+#_cccd_uuid = '00002902-0000-1000-8000-00805f9b34fb'
+_rx_char_uuid = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'
+_tx_char_uuid = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'
 
 _write_chunk_size = 20 # as in android dumps
 
@@ -60,8 +60,8 @@ class BLELink(BaseLink):
 		res = []
 		devices = self._adapter.scan(timeout=SCAN_TIMEOUT)
 		for dev in devices:
-			if dev["name"].startswith(u"MISc"):
-				res.append((dev["name"], dev["address"]))
+			if dev['name'].startswith((u'MISc', u'NBSc')):
+				res.append((dev['name'], dev['address']))
 		return res
 
 
@@ -88,13 +88,13 @@ class BLELink(BaseLink):
 		except queue.Empty:
 			raise LinkTimeoutException
 		if self.dump:
-			print "<", hexlify(data).upper()
+			print '<', hexlify(data).upper()
 		return data
 
 
 	def write(self, data):
 		if self.dump:
-			print ">", hexlify(data).upper()
+			print '>', hexlify(data).upper()
 		size = len(data)
 		ofs = 0
 		while size:
@@ -104,4 +104,4 @@ class BLELink(BaseLink):
 			size -= chunk_sz
 
 
-__all__ = ["BLELink"]
+__all__ = ['BLELink']

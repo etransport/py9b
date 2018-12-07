@@ -6,27 +6,29 @@ from py9b.link.serial import SerialLink
 from py9b.transport.base import BaseTransport as BT
 from py9b.transport.packet import BasePacket as PKT
 from py9b.transport.xiaomi import XiaomiTransport
+from py9b.transport.ninebot import NinebotTransport
 from py9b.command.regio import ReadRegs
 
 READ_CHUNK_SIZE = 0x10
 
-#link = SerialLink(dump=True)
+link = SerialLink()
 #link = TCPLink()
-link = BLELink()
+#link = BLELink()
 
 with link:
 	print "Scanning..."
 	ports = link.scan()
 	print ports
 
-	tran = XiaomiTransport(link)
+	#tran = XiaomiTransport(link)
+	tran = NinebotTransport(link)
 
 	#link.open(("192.168.1.45", 6000))
 	link.open(ports[0][1])
 	print "Connected"
 
 	hfo = open("EscRegs.bin", "wb")
-	for i in xrange(0x0, 0x100, READ_CHUNK_SIZE):
+	for i in xrange(0x0, 0x200, READ_CHUNK_SIZE):
 		print ".",
 		for retry in xrange(5):
 			try:

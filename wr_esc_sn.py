@@ -8,12 +8,14 @@ from py9b.link.serial import SerialLink
 from py9b.transport.base import BaseTransport as BT
 from py9b.transport.packet import BasePacket as PKT
 from py9b.transport.xiaomi import XiaomiTransport
+from py9b.transport.ninebot import NinebotTransport
 from py9b.command.regio import ReadRegs, WriteRegs
 from py9b.command.mfg import WriteSN
+from time import sleep
 
 
-new_sn = "16133/00101234"
-
+#new_sn = "16133/00101234"
+#new_sn = "N2GTR1826C1234"
 
 def CalcSnAuth(oldsn, newsn, uid3):
 	s = 0
@@ -37,7 +39,8 @@ with link:
 	ports = link.scan()
 	print(ports)
 
-	tran = XiaomiTransport(link)
+	#tran = XiaomiTransport(link)
+	tran = NinebotTransport(link)
 
 	#link.open(("192.168.1.45", 6000))
 	link.open(ports[0][1])
@@ -57,7 +60,7 @@ with link:
 
 	
 	#lock
-	tran.execute(WriteRegs(BT.ESC, 0x70, "<B", 0x01))
+	#tran.execute(WriteRegs(BT.ESC, 0x70, "<H", 0x01))
 
 	old_sn = tran.execute(ReadRegs(BT.ESC, 0x10, "14s"))[0]
 	print("Old S/N:", old_sn)
@@ -66,15 +69,18 @@ with link:
 	print("UID3: %08X" % (uid3))
 
 	auth = CalcSnAuth(old_sn, new_sn, uid3)
+	#auth = 0
 	print("Auth: %08X"  % (auth))
 
-	for i in range(3):
-		try:
-			tran.execute(WriteSN(BT.ESC, new_sn, auth))
-			print("OK")
-			break
-		except LinkTimeoutException:
-			print("Timeout !")
+	try:
+		tran.execute(WriteSN(BT.ESC, new_sn, auth))
+		print("OK")
+	except LinkTimeoutException:
+		print("Timeout !")
+
+	# save config and restart
+	tran.execute(WriteRegs(BT.ESC, 0x78, "<H", 0x01))
+	sleep(3)
 
 	old_sn = tran.execute(ReadRegs(BT.ESC, 0x10, "14s"))[0]
 	print("Current S/N:", old_sn)

@@ -7,9 +7,7 @@ from py9b.transport.base import BaseTransport as BT
 from py9b.transport.packet import BasePacket as PKT
 from py9b.transport.xiaomi import XiaomiTransport
 from py9b.transport.ninebot import NinebotTransport
-from py9b.command.regio import ReadRegs
-
-READ_CHUNK_SIZE = 0x10
+from py9b.command.regio import ReadRegs, WriteRegs
 
 #link = SerialLink(dump=True)
 #link = TCPLink()
@@ -27,19 +25,7 @@ with link:
 	link.open(ports[0][1])
 	print "Connected"
 
-	hfo = open("BmsRegs.bin", "wb")
-	for i in xrange(0x0, 0x100, READ_CHUNK_SIZE):
-		print ".",
-		for retry in xrange(5):
-			try:
-				data = tran.execute(ReadRegs(BT.BMS, i>>1, "16s"))[0]
-			except LinkTimeoutException:
-				continue
-			break
-		else:
-			print "No response !"
-			break
-		hfo.write(data)
+	print('Power off...')
+	tran.execute(WriteRegs(BT.ESC, 0x79, '<H', 0x0001)) 
 
-	hfo.close()
 	link.close()

@@ -13,9 +13,10 @@ class BaseTransport(object):
 	ESC = 0x20
 	BLE = 0x21
 	BMS = 0x22
+	EXTBMS = 0x23
 	HOST = 0x3E
 	
-	DeviceNames = { MOTOR : "MOTOR", ESC : "ESC", BLE : "BLE", BMS : "BMS", HOST : "HOST" }
+	DeviceNames = { MOTOR : "MOTOR", ESC : "ESC", BLE : "BLE", BMS : "BMS", EXTBMS : "EXTBMS", HOST : "HOST" }
 
 	def __init__(self, link):
 		self.link = link

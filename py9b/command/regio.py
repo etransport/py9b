@@ -28,10 +28,18 @@ class WriteRegs(BaseCommand):
 		self.reg = reg
 
 	def handle_response(self, response):
-		if response.arg!=self.reg or len(response.data)!=1:
+		if response.cmd==0x02: # xiaomi style
+			if response.arg!=self.reg or len(response.data)!=1:
+				raise InvalidResponse("WriteRegs {0:X}:{1:X}".format(self.dev, self.reg))
+			if unpack("<B", response.data)[0]!=1:
+				raise WriteProtectError("WriteRegs {0:X}:{1:X}".format(self.dev, self.reg))
+		elif response.cmd==0x05: # ninebot style
+			if len(response.data)!=0:
+				raise InvalidResponse("WriteRegs {0:X}:{1:X}".format(self.dev, self.reg))
+			if response.arg!=0:
+				raise WriteProtectError("WriteRegs {0:X}:{1:X}".format(self.dev, self.reg))
+		else:
 			raise InvalidResponse("WriteRegs {0:X}:{1:X}".format(self.dev, self.reg))
-		if unpack("<B", response.data)[0]!=1:
-			raise WriteProtectError("WriteRegs {0:X}:{1:X}".format(self.dev, self.reg))
 		return True
 
 

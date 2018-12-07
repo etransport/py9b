@@ -6,7 +6,7 @@ from .base import BaseLink, LinkTimeoutException, LinkOpenException
 
 HOST, PORT = "127.0.0.1", 6000
 
-_write_chunk_size = 20 # as in android dumps
+_write_chunk_size = 20 # 20 as in android dumps
 
 def recvall(sock, size):
 	data = ""
@@ -36,13 +36,17 @@ class TCPLink(BaseLink):
 
 
 	def scan(self):
-		res = [("Android UART Bridge", (HOST, PORT))]
+		res = [("Android UART Bridge", HOST+':'+str(PORT))]
 		return res
 
 
 	def open(self, port):
+		p = port.partition(':')
+		host = p[0]
+		port = int(p[2], 10)
+		print host, port
 		try:
-			self.sock.connect(port)
+			self.sock.connect((host, port))
 		except socket.timeout:
 			raise LinkOpenException
 		self.connected = True
